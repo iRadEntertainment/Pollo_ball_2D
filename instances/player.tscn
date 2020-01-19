@@ -1,0 +1,7 @@
+[gd_scene format=2]
+
+[node name="player" type="KinematicBody2D"]
+
+[node name="sprite" type="Sprite" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]

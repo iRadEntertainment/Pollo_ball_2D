@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/mus_Bassloop.ogg-48d36fd8e172905afec743b78579a7f1.oggstr"
+
+[deps]
+
+source_file="res://audio/mus_Bassloop.ogg"
+dest_files=[ "res://.import/mus_Bassloop.ogg-48d36fd8e172905afec743b78579a7f1.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0

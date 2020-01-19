@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/sfx_interr_1.wav-23a1ecac4c3c4846bb8f8610e53902ad.sample"
+
+[deps]
+
+source_file="res://audio/sfx_interr_1.wav"
+dest_files=[ "res://.import/sfx_interr_1.wav-23a1ecac4c3c4846bb8f8610e53902ad.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

@@ -1,0 +1,246 @@
+[gd_scene load_steps=12 format=2]
+
+[ext_resource path="res://themes/main_theme.tres" type="Theme" id=1]
+[ext_resource path="res://themes/fonts/nk57-monospace/nk57-monospace-no-rg.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://themes/fonts/laser-rod/Laser Rod.ttf" type="DynamicFontData" id=3]
+[ext_resource path="res://script/menu.gd" type="Script" id=4]
+
+[sub_resource type="DynamicFont" id=1]
+size = 80
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 25
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 32
+outline_size = 1
+outline_color = Color( 0.505882, 0.0470588, 0.0470588, 1 )
+font_data = ExtResource( 3 )
+
+[sub_resource type="GDScript" id=4]
+script/source = "#start button
+
+extends Button
+
+func _ready():
+	grab_focus()
+
+func _pressed():
+	owner.start_new_game()
+
+"
+
+[sub_resource type="GDScript" id=7]
+script/source = "extends OptionButton
+
+export (String, DIR) var path = \"res://scenes\"
+export var search_for = \"arena\"
+
+var selected_arena_path = \"\"
+
+func _ready():
+	connect(\"item_selected\",self,\"_arena_selected\")
+	#add arenas listed in the folder \"path\" as an option for the option button
+	var arenas_list = dir_contents(path)
+	clear()
+	for i in range(arenas_list.size()):
+		add_item(arenas_list[i],i)
+	_arena_selected(0)
+
+func _arena_selected(id):
+	owner.selected_arena = path + \"/\" + str(items[id])
+	
+
+
+
+func dir_contents(path):
+	var dir = Directory.new()
+	var arenas_list = []
+	if dir.open(path) == OK:
+		dir.list_dir_begin()
+		var file_name = dir.get_next()
+		while (file_name != \"\"):
+			if !dir.current_is_dir() and ( search_for in file_name ):
+				arenas_list.append(file_name)
+			file_name = dir.get_next()
+		return arenas_list
+	else:
+		print(\"Please select a valid path for the directory containing the arenas.\")
+"
+
+[sub_resource type="GDScript" id=5]
+script/source = "extends Button
+func _pressed():
+	OS.window_fullscreen = !OS.window_fullscreen
+"
+
+[sub_resource type="GDScript" id=6]
+script/source = "extends Button
+func _pressed():
+	get_tree().quit()
+"
+
+[node name="menu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 1 )
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="bg" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="version" type="Label" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -88.0
+margin_top = -15.0
+margin_right = 59.0
+margin_bottom = 5.0
+rect_rotation = 45.0
+text = "ver 0.1"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="bg" type="ColorRect" parent="version"]
+show_behind_parent = true
+anchor_left = -1.0
+anchor_top = -0.1
+anchor_right = 2.0
+anchor_bottom = 1.1
+color = Color( 0.156863, 0.407843, 0.0901961, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="box_main" type="HBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="cnt_title" type="VBoxContainer" parent="box_main"]
+margin_right = 916.0
+margin_bottom = 800.0
+rect_min_size = Vector2( 800, 250 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="title" type="Label" parent="box_main/cnt_title"]
+margin_right = 916.0
+margin_bottom = 95.0
+custom_fonts/font = SubResource( 1 )
+text = "Bomb League"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="subtitle" type="Label" parent="box_main/cnt_title"]
+margin_top = 99.0
+margin_right = 916.0
+margin_bottom = 130.0
+custom_fonts/font = SubResource( 2 )
+text = "2D demo - proof of concept"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="cnt_title2" type="Control" parent="box_main"]
+margin_left = 920.0
+margin_right = 1280.0
+margin_bottom = 800.0
+rect_min_size = Vector2( 360, 360 )
+
+[node name="btn_cont" type="VBoxContainer" parent="box_main/cnt_title2"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 32.0
+margin_top = 60.0
+margin_right = -32.0
+margin_bottom = -32.0
+custom_constants/separation = 8
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="menu_title" type="Label" parent="box_main/cnt_title2/btn_cont"]
+margin_right = 296.0
+margin_bottom = 39.0
+custom_fonts/font = SubResource( 3 )
+text = "menu"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="hsep0" type="HSeparator" parent="box_main/cnt_title2/btn_cont"]
+margin_top = 47.0
+margin_right = 296.0
+margin_bottom = 51.0
+
+[node name="start" type="Button" parent="box_main/cnt_title2/btn_cont"]
+margin_top = 59.0
+margin_right = 296.0
+margin_bottom = 115.0
+text = "Start demo"
+script = SubResource( 4 )
+
+[node name="lb_select" type="Label" parent="box_main/cnt_title2/btn_cont"]
+margin_top = 123.0
+margin_right = 296.0
+margin_bottom = 145.0
+text = "seleziona arena"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="OptionButton" type="OptionButton" parent="box_main/cnt_title2/btn_cont"]
+margin_top = 153.0
+margin_right = 296.0
+margin_bottom = 209.0
+script = SubResource( 7 )
+
+[node name="hsep1" type="HSeparator" parent="box_main/cnt_title2/btn_cont"]
+margin_top = 217.0
+margin_right = 296.0
+margin_bottom = 221.0
+
+[node name="fullscreen" type="Button" parent="box_main/cnt_title2/btn_cont"]
+margin_top = 229.0
+margin_right = 296.0
+margin_bottom = 285.0
+text = "Fullscreen toggle"
+script = SubResource( 5 )
+
+[node name="quit" type="Button" parent="box_main/cnt_title2/btn_cont"]
+margin_top = 293.0
+margin_right = 296.0
+margin_bottom = 349.0
+text = "Exit game"
+script = SubResource( 6 )
