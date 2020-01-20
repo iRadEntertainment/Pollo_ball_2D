@@ -1,21 +1,226 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=37 format=2]
 
 [ext_resource path="res://themes/main_theme.tres" type="Theme" id=1]
 [ext_resource path="res://themes/fonts/nk57-monospace/nk57-monospace-no-rg.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://themes/fonts/laser-rod/Laser Rod.ttf" type="DynamicFontData" id=3]
 [ext_resource path="res://script/menu.gd" type="Script" id=4]
+[ext_resource path="res://themes/small_theme.tres" type="Theme" id=5]
+[ext_resource path="res://sprites/floor3.jpg" type="Texture" id=6]
+[ext_resource path="res://sprites/spacecraft_wings.png" type="Texture" id=7]
+[ext_resource path="res://sprites/spacecraft_shadow.png" type="Texture" id=8]
+[ext_resource path="res://sprites/spacecraft_body.png" type="Texture" id=9]
+[ext_resource path="res://sprites/spacecraft_colors.png" type="Texture" id=10]
+[ext_resource path="res://sprites/light_cone.png" type="Texture" id=11]
+[ext_resource path="res://sprites/spacecraft_glass.png" type="Texture" id=12]
+[ext_resource path="res://sprites/spacecraft_glass_norm.png" type="Texture" id=13]
+[ext_resource path="res://sprites/spacecraft_body_norm.png" type="Texture" id=14]
+[ext_resource path="res://sprites/spacecraft_wings_norm.png" type="Texture" id=15]
+[ext_resource path="res://sprites/floor2.png" type="Texture" id=16]
+
+[sub_resource type="Shader" id=17]
+code = "shader_type canvas_item;
+
+uniform float speed = 0.6;
+
+void fragment(){
+	vec2 uv = vec2(UV.x,UV.y-TIME*speed);
+	vec4 col = texture(TEXTURE,uv);
+	COLOR = col;
+}"
+
+[sub_resource type="ShaderMaterial" id=18]
+render_priority = 1
+shader = SubResource( 17 )
+shader_param/speed = 0.25
 
 [sub_resource type="DynamicFont" id=1]
-size = 80
+size = 120
 use_mipmaps = true
 use_filter = true
 font_data = ExtResource( 3 )
 
 [sub_resource type="DynamicFont" id=2]
-size = 25
+size = 34
 use_mipmaps = true
 use_filter = true
 font_data = ExtResource( 2 )
+
+[sub_resource type="GDScript" id=19]
+script/source = "extends TextureRect
+
+export var speed = 400
+
+func _ready():
+	if name == \"running_floor2\":
+		rect_global_position.y = -rect_size.y
+	else:
+		rect_global_position.y = 0
+
+func _process(d):
+	rect_position.y += d*speed
+	if rect_global_position.y >= get_viewport_rect().size.y:
+		rect_global_position.y = -rect_size.y
+"
+
+[sub_resource type="GDScript" id=12]
+script/source = "#menu spacecraft for fun
+
+extends Node2D
+
+var border_offset = Vector2(120,120)
+var actual_scale = scale
+
+onready var laser_preload = preload(\"res://instances/laser_shot.tscn\")
+
+func _process(d):
+	var mouse_pos = get_global_mouse_position()
+	var viewport = get_viewport().size
+	
+	var area = get_parent().rect_size - 2*border_offset
+	
+	var new_pos = Vector2( 	mouse_pos.x/viewport.x * area.x ,\\
+							mouse_pos.y/viewport.y * area.y )
+	
+	var move_vec = (new_pos - position + border_offset)
+	position += move_vec*d*4
+	scale.x = clamp( 1-abs(move_vec.x)/300 , actual_scale.x*0.9 , actual_scale.x )
+
+func _unhandled_input(event):
+	if event is InputEventMouseButton:
+		if event.button_mask == BUTTON_LEFT:
+			fire()
+
+
+var fl_fire_left = true
+func fire():
+	var laser = laser_preload.instance()
+	$\"../shots_container\".add_child(laser)
+	
+	if fl_fire_left:
+		laser.global_position = $las2_pos.global_position
+		fl_fire_left = false
+	else:
+		laser.global_position = $las1_pos.global_position
+		fl_fire_left = true
+	laser.global_rotation = $las1_pos.global_rotation
+"
+
+[sub_resource type="Gradient" id=20]
+offsets = PoolRealArray( 0.0638298, 0.170213, 0.425532 )
+colors = PoolColorArray( 1, 0.995728, 0.984375, 1, 0.901367, 0.654377, 0.130276, 1, 0.211765, 0.0117647, 0.0117647, 0.145098 )
+
+[sub_resource type="GradientTexture" id=21]
+gradient = SubResource( 20 )
+width = 512
+
+[sub_resource type="ParticlesMaterial" id=15]
+lifetime_randomness = 0.47
+trail_divisor = 2
+emission_shape = 1
+emission_sphere_radius = 7.0
+flag_disable_z = true
+direction = Vector3( 0, 1, 0 )
+spread = 5.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 400.0
+initial_velocity_random = 0.13
+angular_velocity = 20.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+linear_accel = -300.0
+linear_accel_random = 0.14
+damping = 100.0
+damping_random = 1.0
+scale = 5.0
+color_ramp = SubResource( 21 )
+
+[sub_resource type="Animation" id=24]
+length = 3.0
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("colors:self_modulate")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0.2, 1.2, 2.3 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ Color( 0.215686, 0.129412, 1, 1 ), Color( 0.301961, 0.811765, 0.243137, 1 ), Color( 0.94902, 0.172549, 0.0941176, 1 ) ]
+}
+
+[sub_resource type="Animation" id=22]
+resource_name = "glass_change"
+length = 0.8
+loop = true
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath("glass:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.75 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ Color( 0.12549, 0.321569, 0.262745, 1 ), Color( 0.545098, 0.196078, 0.156863, 1 ) ]
+}
+
+[sub_resource type="GDScript" id=25]
+script/source = "extends Control
+
+var speed
+func _ready():
+	speed = $\"../running_floor\".speed
+	
+	$cone_dx.position.x = get_parent().get_rect().size.x
+	$cone_dx.position.y = get_parent().get_rect().size.y/2
+	
+	$cone_sx.position.x = 0
+	$cone_sx.position.y = 0
+
+func _process(delta):
+	$cone_dx.position.y += delta*speed
+	$cone_sx.position.y += delta*speed
+	
+	if $cone_dx.global_position.y >= get_viewport_rect().size.y+100:
+		$cone_dx.global_position.y = -100
+	if $cone_sx.global_position.y >= get_viewport_rect().size.y+100:
+		$cone_sx.global_position.y = -100
+	
+"
+
+[sub_resource type="Animation" id=23]
+resource_name = "light_anim"
+length = 5.0
+loop = true
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath("cone_sx:energy")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.6, 0.65, 0.7, 0.75, 0.9, 0.95, 1.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 1.5, 1.5, 2.0, 0.0, 1.5, 2.0, 0.0, 1.5 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("cone_dx:energy")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2, 0.25, 0.3, 0.35 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 1.5, 1.5, 3.0, 0.5, 1.5 ]
+}
 
 [sub_resource type="DynamicFont" id=3]
 size = 32
@@ -36,7 +241,7 @@ func _pressed():
 
 "
 
-[sub_resource type="GDScript" id=7]
+[sub_resource type="GDScript" id=5]
 script/source = "extends OptionButton
 
 export (String, DIR) var path = \"res://scenes\"
@@ -51,12 +256,11 @@ func _ready():
 	clear()
 	for i in range(arenas_list.size()):
 		add_item(arenas_list[i],i)
+		
 	_arena_selected(0)
 
 func _arena_selected(id):
-	owner.selected_arena = path + \"/\" + str(items[id])
-	
-
+	owner.selected_arena = path + \"/\" + str(get_item_text(id))
 
 
 func dir_contents(path):
@@ -74,21 +278,41 @@ func dir_contents(path):
 		print(\"Please select a valid path for the directory containing the arenas.\")
 "
 
-[sub_resource type="GDScript" id=5]
+[sub_resource type="GDScript" id=6]
 script/source = "extends Button
 func _pressed():
 	OS.window_fullscreen = !OS.window_fullscreen
 "
 
-[sub_resource type="GDScript" id=6]
+[sub_resource type="GDScript" id=7]
 script/source = "extends Button
 func _pressed():
 	get_tree().quit()
 "
 
+[sub_resource type="GDScript" id=8]
+script/source = "extends Button
+
+
+func _pressed():
+	OS.shell_open(\"https://github.com/iRadEntertainment/Pollo_ball_2D\")
+"
+
+[sub_resource type="GDScript" id=9]
+script/source = "extends CheckBox
+
+func _ready():
+	pressed = game_manager.debug_mode
+
+func _toggled(val):
+	game_manager.debug_mode = val
+	print(\"Debug mode = %s\"%game_manager.debug_mode)
+"
+
 [node name="menu" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 theme = ExtResource( 1 )
 script = ExtResource( 4 )
 __meta__ = {
@@ -97,9 +321,26 @@ __meta__ = {
 }
 
 [node name="bg" type="ColorRect" parent="."]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="bg_texture" type="TextureRect" parent="."]
+self_modulate = Color( 0.176471, 0.168627, 0.168627, 1 )
+light_mask = 2
+material = SubResource( 18 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource( 16 )
+expand = true
+stretch_mode = 2
 __meta__ = {
 "_edit_lock_": true,
 "_edit_use_anchors_": false
@@ -134,21 +375,33 @@ __meta__ = {
 [node name="box_main" type="HBoxContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = 32.0
+margin_top = 32.0
+margin_right = -32.0
+margin_bottom = -32.0
+mouse_filter = 2
+custom_constants/separation = 32
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="cnt_title" type="VBoxContainer" parent="box_main"]
-margin_right = 916.0
-margin_bottom = 800.0
-rect_min_size = Vector2( 800, 250 )
+margin_right = 824.0
+margin_bottom = 736.0
+rect_min_size = Vector2( 400, 250 )
+mouse_filter = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="title" type="Label" parent="box_main/cnt_title"]
-margin_right = 916.0
-margin_bottom = 95.0
+margin_right = 824.0
+margin_bottom = 142.0
 custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0.505882, 0.0470588, 0.0470588, 1 )
+custom_constants/shadow_offset_x = 3
+custom_constants/shadow_offset_y = 3
+custom_constants/shadow_as_outline = 1
 text = "Bomb League"
 align = 1
 valign = 1
@@ -157,9 +410,9 @@ __meta__ = {
 }
 
 [node name="subtitle" type="Label" parent="box_main/cnt_title"]
-margin_top = 99.0
-margin_right = 916.0
-margin_bottom = 130.0
+margin_top = 146.0
+margin_right = 824.0
+margin_bottom = 188.0
 custom_fonts/font = SubResource( 2 )
 text = "2D demo - proof of concept"
 align = 1
@@ -168,26 +421,176 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="cnt_title2" type="Control" parent="box_main"]
-margin_left = 920.0
-margin_right = 1280.0
-margin_bottom = 800.0
-rect_min_size = Vector2( 360, 360 )
+[node name="anim" type="Control" parent="box_main/cnt_title"]
+show_behind_parent = true
+margin_top = 192.0
+margin_right = 824.0
+margin_bottom = 736.0
+mouse_filter = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="btn_cont" type="VBoxContainer" parent="box_main/cnt_title2"]
+[node name="running_floor" type="TextureRect" parent="box_main/cnt_title/anim"]
+light_mask = 3
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 32.0
-margin_top = 60.0
-margin_right = -32.0
-margin_bottom = -32.0
+margin_top = -365.0
+margin_bottom = 29.0
+mouse_filter = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 6 )
+expand = true
+script = SubResource( 19 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="running_floor2" type="TextureRect" parent="box_main/cnt_title/anim"]
+light_mask = 3
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -1339.81
+margin_bottom = -945.812
+mouse_filter = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 6 )
+expand = true
+script = SubResource( 19 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="shots_container" type="Node2D" parent="box_main/cnt_title/anim"]
+
+[node name="nav" type="Node2D" parent="box_main/cnt_title/anim"]
+position = Vector2( 395.268, 363.589 )
+scale = Vector2( 0.7, 0.7 )
+script = SubResource( 12 )
+
+[node name="shadow" type="Sprite" parent="box_main/cnt_title/anim/nav"]
+show_behind_parent = true
+light_mask = 5
+position = Vector2( -2.58185, 32.2743 )
+texture = ExtResource( 8 )
+
+[node name="body" type="Sprite" parent="box_main/cnt_title/anim/nav"]
+self_modulate = Color( 0.694118, 0.670588, 0.670588, 1 )
+light_mask = 3
+texture = ExtResource( 9 )
+normal_map = ExtResource( 14 )
+
+[node name="wings" type="Sprite" parent="box_main/cnt_title/anim/nav"]
+self_modulate = Color( 0.141176, 0.121569, 0.121569, 1 )
+light_mask = 3
+texture = ExtResource( 7 )
+normal_map = ExtResource( 15 )
+
+[node name="colors" type="Sprite" parent="box_main/cnt_title/anim/nav"]
+self_modulate = Color( 0.215686, 0.129412, 1, 1 )
+light_mask = 3
+texture = ExtResource( 10 )
+
+[node name="glass" type="Sprite" parent="box_main/cnt_title/anim/nav"]
+self_modulate = Color( 0.12549, 0.321569, 0.262745, 1 )
+light_mask = 3
+texture = ExtResource( 12 )
+normal_map = ExtResource( 13 )
+
+[node name="burner" type="Particles2D" parent="box_main/cnt_title/anim/nav"]
+position = Vector2( 0, 58.0335 )
+amount = 120
+local_coords = false
+process_material = SubResource( 15 )
+
+[node name="burner_light" type="Light2D" parent="box_main/cnt_title/anim/nav"]
+position = Vector2( 0, 48 )
+texture = ExtResource( 11 )
+offset = Vector2( 0, 256 )
+color = Color( 0.686275, 0.568627, 0.156863, 1 )
+energy = 3.0
+range_item_cull_mask = 2
+shadow_item_cull_mask = 0
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="las1_pos" type="Position2D" parent="box_main/cnt_title/anim/nav"]
+position = Vector2( -30, -100 )
+rotation = -1.5708
+
+[node name="las2_pos" type="Position2D" parent="box_main/cnt_title/anim/nav"]
+position = Vector2( 30, -100 )
+rotation = -1.5708
+
+[node name="color_anim" type="AnimationPlayer" parent="box_main/cnt_title/anim/nav"]
+autoplay = "color_change"
+anims/color_change = SubResource( 24 )
+
+[node name="glass_anim" type="AnimationPlayer" parent="box_main/cnt_title/anim/nav"]
+autoplay = "glass_change"
+anims/glass_change = SubResource( 22 )
+
+[node name="light" type="Control" parent="box_main/cnt_title/anim"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = SubResource( 25 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="cone_dx" type="Light2D" parent="box_main/cnt_title/anim/light"]
+position = Vector2( 812.066, 118.842 )
+rotation = 1.5708
+texture = ExtResource( 11 )
+offset = Vector2( 0, 512 )
+texture_scale = 2.0
+energy = 1.5
+range_height = 120.0
+range_item_cull_mask = 2
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="cone_sx" type="Light2D" parent="box_main/cnt_title/anim/light"]
+position = Vector2( 6.10352e-05, 373.82 )
+rotation = -1.5708
+texture = ExtResource( 11 )
+offset = Vector2( 0, 512 )
+texture_scale = 2.0
+energy = 2.0
+range_height = 120.0
+range_item_cull_mask = 2
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="anim_lights" type="AnimationPlayer" parent="box_main/cnt_title/anim/light"]
+autoplay = "light_anim"
+anims/light_anim = SubResource( 23 )
+
+[node name="cnt_right" type="Control" parent="box_main"]
+margin_left = 856.0
+margin_right = 1216.0
+margin_bottom = 736.0
+rect_min_size = Vector2( 360, 360 )
+mouse_filter = 2
+
+[node name="btn_cont" type="VBoxContainer" parent="box_main/cnt_right"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
 custom_constants/separation = 8
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="menu_title" type="Label" parent="box_main/cnt_title2/btn_cont"]
-margin_right = 296.0
+[node name="menu_title" type="Label" parent="box_main/cnt_right/btn_cont"]
+margin_right = 360.0
 margin_bottom = 39.0
 custom_fonts/font = SubResource( 3 )
 text = "menu"
@@ -197,50 +600,99 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="hsep0" type="HSeparator" parent="box_main/cnt_title2/btn_cont"]
+[node name="hsep0" type="HSeparator" parent="box_main/cnt_right/btn_cont"]
 margin_top = 47.0
-margin_right = 296.0
+margin_right = 360.0
 margin_bottom = 51.0
 
-[node name="start" type="Button" parent="box_main/cnt_title2/btn_cont"]
+[node name="start" type="Button" parent="box_main/cnt_right/btn_cont"]
 margin_top = 59.0
-margin_right = 296.0
+margin_right = 360.0
 margin_bottom = 115.0
-text = "Start demo"
+text = "Start demo solo"
 script = SubResource( 4 )
 
-[node name="lb_select" type="Label" parent="box_main/cnt_title2/btn_cont"]
+[node name="lb_select" type="Label" parent="box_main/cnt_right/btn_cont"]
 margin_top = 123.0
-margin_right = 296.0
+margin_right = 360.0
 margin_bottom = 145.0
-text = "seleziona arena"
+text = "select arena"
 align = 1
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="OptionButton" type="OptionButton" parent="box_main/cnt_title2/btn_cont"]
+[node name="arena_selector" type="OptionButton" parent="box_main/cnt_right/btn_cont"]
 margin_top = 153.0
-margin_right = 296.0
+margin_right = 360.0
 margin_bottom = 209.0
-script = SubResource( 7 )
-
-[node name="hsep1" type="HSeparator" parent="box_main/cnt_title2/btn_cont"]
-margin_top = 217.0
-margin_right = 296.0
-margin_bottom = 221.0
-
-[node name="fullscreen" type="Button" parent="box_main/cnt_title2/btn_cont"]
-margin_top = 229.0
-margin_right = 296.0
-margin_bottom = 285.0
-text = "Fullscreen toggle"
 script = SubResource( 5 )
 
-[node name="quit" type="Button" parent="box_main/cnt_title2/btn_cont"]
-margin_top = 293.0
-margin_right = 296.0
+[node name="host" type="Button" parent="box_main/cnt_right/btn_cont"]
+margin_top = 217.0
+margin_right = 360.0
+margin_bottom = 273.0
+text = "Host a match"
+
+[node name="join" type="Button" parent="box_main/cnt_right/btn_cont"]
+margin_top = 281.0
+margin_right = 360.0
+margin_bottom = 337.0
+text = "Join a match"
+
+[node name="hsep1" type="HSeparator" parent="box_main/cnt_right/btn_cont"]
+margin_top = 345.0
+margin_right = 360.0
 margin_bottom = 349.0
-text = "Exit game"
+
+[node name="fullscreen" type="Button" parent="box_main/cnt_right/btn_cont"]
+margin_top = 357.0
+margin_right = 360.0
+margin_bottom = 413.0
+text = "Fullscreen toggle"
 script = SubResource( 6 )
+
+[node name="quit" type="Button" parent="box_main/cnt_right/btn_cont"]
+margin_top = 421.0
+margin_right = 360.0
+margin_bottom = 477.0
+text = "Exit game"
+script = SubResource( 7 )
+
+[node name="hbox_bottom" type="HBoxContainer" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = -31.0
+margin_right = -8.0
+margin_bottom = -8.0
+mouse_filter = 2
+theme = ExtResource( 5 )
+custom_constants/separation = 16
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="open_repo" type="Button" parent="hbox_bottom"]
+margin_left = 396.0
+margin_right = 612.0
+margin_bottom = 24.0
+text = "open repository in browser"
+script = SubResource( 8 )
+
+[node name="debug" type="CheckBox" parent="hbox_bottom"]
+margin_left = 628.0
+margin_right = 734.0
+margin_bottom = 24.0
+text = "debug mode"
+script = SubResource( 9 )
+
+[node name="godot_ver" type="Label" parent="hbox_bottom"]
+margin_left = 750.0
+margin_top = 1.0
+margin_right = 867.0
+margin_bottom = 23.0
+text = "Godot 3.2 RC1"

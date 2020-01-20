@@ -13,7 +13,7 @@ func _ready():
 
 #---------------------- GUI sounds -------------------------
 func set_volume_for_each_GUI_element():
-	$menu/ambient.volume_db      = -10
+	$menu/ambient.volume_db      = -18
 	$menu/music.volume_db        = 0
 	$menu/button_hover.volume_db = -12
 	$menu/button_press.volume_db = 0
@@ -35,6 +35,10 @@ func stop_all_menu_audio():
 func play_hover_button(): $menu/button_hover.play()
 func play_press_button(): $menu/button_press.play()
 
+
+#---------------------- Arena sounds -------------------------
+func play_arena_sounds():
+	$arena/stadium.play()
 
 #----------------------- process -----------------------------
 

@@ -1,0 +1,95 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://sprites/laser-sprite-png-transparent.png" type="Texture" id=1]
+[ext_resource path="res://audio/sfx_noisecollector_lazerburster.wav" type="AudioStream" id=2]
+[ext_resource path="res://sprites/light_cone.png" type="Texture" id=3]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends KinematicBody2D
+
+export var col = Color.red
+var laser_speed = 3000
+var height = 1
+var spacecraft_velocity = Vector2()
+var velocity = Vector2()
+var lifetime = 1.5 #sec
+var player_owner = null
+var bounces = 2
+
+func _ready():
+	add_collision_exception_with(player_owner)
+	modulate = col
+	$light.color = col
+	$timer.wait_time = lifetime
+	$timer.start()
+	velocity = Vector2(laser_speed ,0).rotated(rotation) + spacecraft_velocity
+
+#func _on_VisibilityNotifier2D_screen_exited():
+#	queue_free()
+
+func _physics_process(d):
+	rotation = velocity.angle()
+	var collision = move_and_collide( velocity )
+	modulate.a = lerp(0,lifetime,$timer.time_left)
+	$light.color.a = lerp(0,lifetime,$timer.time_left)
+	if collision:
+		if collision.collider.has_method(\"get_hit_by_laser\"):
+			collision.collider.get_hit_by_laser(velocity*d)
+			explode()
+		elif bounces <= 0:
+			explode()
+		elif collision.collider is StaticBody2D:
+			velocity = velocity.bounce(collision.normal)
+			bounces -= 1
+
+
+func explode():
+	print(\"kabooom\")
+	queue_free()
+
+
+func _on_timer_timeout():
+	queue_free()
+"
+
+[sub_resource type="CapsuleShape2D" id=2]
+radius = 4.92313
+height = 101.007
+
+[node name="laser_shot" type="KinematicBody2D"]
+script = SubResource( 1 )
+
+[node name="sprite" type="Sprite" parent="."]
+light_mask = 0
+texture = ExtResource( 1 )
+vframes = 11
+frame = 9
+
+[node name="coll" type="CollisionShape2D" parent="."]
+rotation = -1.57079
+shape = SubResource( 2 )
+
+[node name="VisibilityNotifier2D" type="VisibilityNotifier2D" parent="."]
+visible = false
+scale = Vector2( 6.80747, 1.75282 )
+
+[node name="sound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 2 )
+volume_db = -6.0
+pitch_scale = 1.2
+autoplay = true
+bus = "sFX"
+
+[node name="light" type="Light2D" parent="."]
+position = Vector2( -55.4017, 0 )
+rotation = -1.57079
+texture = ExtResource( 3 )
+offset = Vector2( 0, 64 )
+texture_scale = 0.25
+color = Color( 0.368627, 0.984314, 0.172549, 1 )
+range_item_cull_mask = 2
+
+[node name="timer" type="Timer" parent="."]
+wait_time = 1.5
+one_shot = true
+[connection signal="timeout" from="timer" to="." method="_on_timer_timeout"]
