@@ -3,7 +3,7 @@
 [ext_resource path="res://themes/fonts/nk57-monospace/nk57-monospace-cd-rg.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://themes/fonts/nk57-monospace/nk57-monospace-no-bd.ttf" type="DynamicFontData" id=2]
 
-[sub_resource type="StyleBoxFlat" id=10]
+[sub_resource type="StyleBoxFlat" id=1]
 content_margin_left = 18.0
 content_margin_right = 18.0
 content_margin_top = 18.0
@@ -15,7 +15,7 @@ border_blend = true
 corner_radius_top_left = 8
 corner_radius_bottom_right = 8
 
-[sub_resource type="StyleBoxFlat" id=11]
+[sub_resource type="StyleBoxFlat" id=2]
 content_margin_left = 4.0
 content_margin_right = 4.0
 content_margin_top = 4.0
@@ -26,7 +26,7 @@ border_color = Color( 1, 0.905882, 0.588235, 1 )
 corner_radius_top_left = 4
 corner_radius_bottom_right = 4
 
-[sub_resource type="StyleBoxFlat" id=12]
+[sub_resource type="StyleBoxFlat" id=3]
 content_margin_left = 4.0
 content_margin_right = 4.0
 content_margin_top = 4.0
@@ -35,7 +35,7 @@ bg_color = Color( 0.505882, 0.0470588, 0.0470588, 1 )
 corner_radius_top_left = 4
 corner_radius_bottom_right = 4
 
-[sub_resource type="StyleBoxFlat" id=13]
+[sub_resource type="StyleBoxFlat" id=4]
 content_margin_left = 4.0
 content_margin_right = 4.0
 content_margin_top = 4.0
@@ -53,7 +53,7 @@ use_mipmaps = true
 use_filter = true
 font_data = ExtResource( 1 )
 
-[sub_resource type="StyleBoxFlat" id=3]
+[sub_resource type="StyleBoxFlat" id=6]
 content_margin_left = 18.0
 content_margin_right = 18.0
 content_margin_top = 18.0
@@ -62,7 +62,7 @@ bg_color = Color( 0.505882, 0.0470588, 0.0470588, 1 )
 corner_radius_top_left = 12
 corner_radius_bottom_right = 12
 
-[sub_resource type="StyleBoxFlat" id=6]
+[sub_resource type="StyleBoxFlat" id=7]
 content_margin_left = 18.0
 content_margin_right = 18.0
 content_margin_top = 18.0
@@ -70,11 +70,11 @@ content_margin_bottom = 18.0
 bg_color = Color( 0.505882, 0.0470588, 0.0470588, 1 )
 corner_radius_top_left = 12
 
-[sub_resource type="StyleBoxEmpty" id=7]
-
-[sub_resource type="StyleBoxFlat" id=8]
+[sub_resource type="StyleBoxEmpty" id=8]
 
 [sub_resource type="StyleBoxFlat" id=9]
+
+[sub_resource type="StyleBoxFlat" id=10]
 content_margin_left = 12.0
 content_margin_right = 12.0
 content_margin_top = 12.0
@@ -84,25 +84,25 @@ border_width_bottom = 2
 border_color = Color( 0.929412, 0.831373, 0.54902, 1 )
 corner_radius_bottom_right = 12
 
-[sub_resource type="DynamicFont" id=14]
+[sub_resource type="DynamicFont" id=11]
 size = 12
 use_mipmaps = true
 use_filter = true
 font_data = ExtResource( 2 )
 
 [resource]
-default_font = SubResource( 14 )
+default_font = SubResource( 11 )
 Button/colors/font_color = Color( 0.88, 0.88, 0.88, 1 )
 Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
 Button/colors/font_color_hover = Color( 0.94, 0.94, 0.94, 1 )
 Button/colors/font_color_pressed = Color( 1, 1, 1, 1 )
 Button/constants/hseparation = 2
 Button/fonts/font = null
-Button/styles/disabled = SubResource( 10 )
-Button/styles/focus = SubResource( 11 )
-Button/styles/hover = SubResource( 11 )
-Button/styles/normal = SubResource( 12 )
-Button/styles/pressed = SubResource( 13 )
+Button/styles/disabled = SubResource( 1 )
+Button/styles/focus = SubResource( 2 )
+Button/styles/hover = SubResource( 2 )
+Button/styles/normal = SubResource( 3 )
+Button/styles/pressed = SubResource( 4 )
 Label/colors/font_color = Color( 1, 1, 1, 1 )
 Label/colors/font_color_shadow = Color( 0, 0, 0, 0 )
 Label/colors/font_outline_modulate = Color( 1, 1, 1, 1 )
@@ -121,10 +121,10 @@ OptionButton/constants/hseparation = 7
 OptionButton/fonts/font = null
 OptionButton/icons/arrow = null
 OptionButton/styles/disabled = null
-OptionButton/styles/focus = SubResource( 3 )
+OptionButton/styles/focus = SubResource( 6 )
 OptionButton/styles/hover = null
 OptionButton/styles/normal = null
-OptionButton/styles/pressed = SubResource( 6 )
+OptionButton/styles/pressed = SubResource( 7 )
 PopupMenu/colors/font_color = Color( 0.88, 0.88, 0.88, 1 )
 PopupMenu/colors/font_color_accel = Color( 0.7, 0.7, 0.7, 0.8 )
 PopupMenu/colors/font_color_disabled = Color( 0.4, 0.4, 0.4, 0.8 )
@@ -137,9 +137,9 @@ PopupMenu/icons/radio_checked = null
 PopupMenu/icons/radio_unchecked = null
 PopupMenu/icons/submenu = null
 PopupMenu/icons/unchecked = null
-PopupMenu/styles/hover = SubResource( 7 )
-PopupMenu/styles/labeled_separator_left = SubResource( 8 )
+PopupMenu/styles/hover = SubResource( 8 )
+PopupMenu/styles/labeled_separator_left = SubResource( 9 )
 PopupMenu/styles/labeled_separator_right = null
-PopupMenu/styles/panel = SubResource( 9 )
+PopupMenu/styles/panel = SubResource( 10 )
 PopupMenu/styles/panel_disabled = null
 PopupMenu/styles/separator = null
