@@ -7,8 +7,8 @@
 [sub_resource type="GDScript" id=1]
 script/source = "extends KinematicBody2D
 
-export var col = Color.red
-var laser_speed = 3000
+export var col = Color.lightsteelblue
+var laser_speed = 100
 var height = 1
 var spacecraft_velocity = Vector2()
 var velocity = Vector2()
@@ -17,7 +17,8 @@ var player_owner = null
 var bounces = 2
 
 func _ready():
-	add_collision_exception_with(player_owner)
+	if player_owner:
+		add_collision_exception_with(player_owner)
 	modulate = col
 	$light.color = col
 	$timer.wait_time = lifetime

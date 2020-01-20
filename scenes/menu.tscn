@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=2]
+[gd_scene load_steps=38 format=2]
 
 [ext_resource path="res://themes/main_theme.tres" type="Theme" id=1]
 [ext_resource path="res://themes/fonts/nk57-monospace/nk57-monospace-no-rg.ttf" type="DynamicFontData" id=2]
@@ -94,6 +94,7 @@ func _unhandled_input(event):
 var fl_fire_left = true
 func fire():
 	var laser = laser_preload.instance()
+	laser.global_rotation = $las1_pos.global_rotation
 	$\"../shots_container\".add_child(laser)
 	
 	if fl_fire_left:
@@ -102,7 +103,6 @@ func fire():
 	else:
 		laser.global_position = $las1_pos.global_position
 		fl_fire_left = true
-	laser.global_rotation = $las1_pos.global_rotation
 "
 
 [sub_resource type="Gradient" id=7]
@@ -299,6 +299,14 @@ func _pressed():
 "
 
 [sub_resource type="GDScript" id=20]
+script/source = "extends Button
+
+
+func _pressed():
+	OS.shell_open(\"https://drive.google.com/drive/u/1/folders/1daP146igQsJdVAxQjrHGuEA7m9cjjc1f\")
+"
+
+[sub_resource type="GDScript" id=21]
 script/source = "extends CheckBox
 
 func _ready():
@@ -677,22 +685,29 @@ __meta__ = {
 }
 
 [node name="open_repo" type="Button" parent="hbox_bottom"]
-margin_left = 396.0
-margin_right = 612.0
+margin_left = 296.0
+margin_right = 512.0
 margin_bottom = 24.0
 text = "open repository in browser"
 script = SubResource( 19 )
 
-[node name="debug" type="CheckBox" parent="hbox_bottom"]
-margin_left = 628.0
-margin_right = 734.0
+[node name="open_gdrive" type="Button" parent="hbox_bottom"]
+margin_left = 528.0
+margin_right = 712.0
 margin_bottom = 24.0
-text = "debug mode"
+text = "open GDrive in browser"
 script = SubResource( 20 )
 
+[node name="debug" type="CheckBox" parent="hbox_bottom"]
+margin_left = 728.0
+margin_right = 834.0
+margin_bottom = 24.0
+text = "debug mode"
+script = SubResource( 21 )
+
 [node name="godot_ver" type="Label" parent="hbox_bottom"]
-margin_left = 750.0
+margin_left = 850.0
 margin_top = 1.0
-margin_right = 867.0
+margin_right = 967.0
 margin_bottom = 23.0
 text = "Godot 3.2 RC1"
