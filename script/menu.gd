@@ -4,17 +4,12 @@
 
 extends Control
 
-# version control
-var version = "0.1"
-var last_update = "17/01/2020"
-
 # start game
 var selected_arena = "" setget _arena_selected
 
 func _ready():
 	#--- version control
-	#--- version control
-	$version.text = "ver %s"%[version]
+	$version.text = "ver %s"%[ntw.version]
 	
 	#--- initialize audio
 	audio_server.play_menu_audio_background()
@@ -31,6 +26,9 @@ func start_new_game():
 		audio_server.play_arena_sounds()
 	else:
 		print("Please select an arena")
+
+func toggle_developer_tab():
+	$developer_tab.visible = !$developer_tab.visible
 
 #----------------------------- setter/getter ---------------------------------
 func _arena_selected(val):

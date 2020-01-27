@@ -11,7 +11,11 @@ func _ready():
 	set_volume_for_each_GUI_element()
 
 
-#---------------------- GUI sounds -------------------------
+#---------------------- Global Bus --------------------------------
+func mute_music(val):
+	AudioServer.set_bus_mute(4,val)
+
+#---------------------- GUI sounds --------------------------------
 func set_volume_for_each_GUI_element():
 	$menu/ambient.volume_db      = -18
 	$menu/music.volume_db        = 0
@@ -39,6 +43,10 @@ func play_press_button(): $menu/button_press.play()
 #---------------------- Arena sounds -------------------------
 func play_arena_sounds():
 	$arena/stadium.play()
+
+func stop_all_arena_audio():
+	for audio_node in $arena.get_children():
+		audio_node.stop()
 
 #----------------------- process -----------------------------
 

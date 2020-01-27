@@ -33,7 +33,7 @@ var firing_time_left = 0
 
 
 func _ready():
-	$sprites/colors/blur.color = team_color
+	get_team_color()
 
 func _process(d):
 	# shadow process
@@ -137,7 +137,11 @@ func get_hit_by_laser(laser_velocity):
 	vec_mov += laser_velocity*2
 	
 
+func get_team_color():
+	$sprites/colors/blur.color = team_color
+	$sprites/colors.self_modulate = team_color
+
 #---------------------- setter/getter -------------------------
 func _team_color_changed(col):
 	team_color = col
-	$sprites/colors/blur.color = team_color
+	get_team_color()

@@ -21,8 +21,13 @@ config/icon="res://icon.png"
 
 [autoload]
 
+ntw="*res://script/ntw.gd"
 game_manager="*res://autoloads/game_manager.tscn"
 audio_server="*res://autoloads/audio_server.tscn"
+
+[debug]
+
+gdscript/warnings/enable=false
 
 [display]
 

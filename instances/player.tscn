@@ -14,18 +14,18 @@
 [ext_resource path="res://sprites/spacecraft_colors_blur.png" type="Texture" id=12]
 [ext_resource path="res://sprites/spacecraft_main_light.png" type="Texture" id=13]
 
-[sub_resource type="CircleShape2D" id=23]
+[sub_resource type="CircleShape2D" id=1]
 radius = 29.2748
 
-[sub_resource type="Gradient" id=17]
+[sub_resource type="Gradient" id=2]
 offsets = PoolRealArray( 0, 0.468085, 1 )
 colors = PoolColorArray( 1, 1, 1, 1, 0.374908, 0.435348, 0.761719, 0.414894, 0, 0, 0, 0 )
 
-[sub_resource type="GradientTexture" id=18]
-gradient = SubResource( 17 )
+[sub_resource type="GradientTexture" id=3]
+gradient = SubResource( 2 )
 width = 128
 
-[sub_resource type="ParticlesMaterial" id=19]
+[sub_resource type="ParticlesMaterial" id=4]
 lifetime_randomness = 0.5
 emission_shape = 1
 emission_sphere_radius = 8.0
@@ -39,17 +39,17 @@ angular_velocity = 1.0
 orbit_velocity = 0.0
 orbit_velocity_random = 0.0
 scale = 5.0
-color_ramp = SubResource( 18 )
+color_ramp = SubResource( 3 )
 
-[sub_resource type="Gradient" id=20]
+[sub_resource type="Gradient" id=5]
 offsets = PoolRealArray( 0.0638298, 0.170213, 0.425532 )
 colors = PoolColorArray( 1, 0.995728, 0.984375, 1, 0.901367, 0.654377, 0.130276, 1, 0.211765, 0.0117647, 0.0117647, 0.145098 )
 
-[sub_resource type="GradientTexture" id=21]
-gradient = SubResource( 20 )
+[sub_resource type="GradientTexture" id=6]
+gradient = SubResource( 5 )
 width = 512
 
-[sub_resource type="ParticlesMaterial" id=22]
+[sub_resource type="ParticlesMaterial" id=7]
 lifetime_randomness = 0.47
 trail_divisor = 2
 emission_shape = 1
@@ -68,9 +68,9 @@ linear_accel_random = 0.14
 damping = 100.0
 damping_random = 1.0
 scale = 3.5
-color_ramp = SubResource( 21 )
+color_ramp = SubResource( 6 )
 
-[sub_resource type="ParticlesMaterial" id=15]
+[sub_resource type="ParticlesMaterial" id=8]
 lifetime_randomness = 0.47
 trail_divisor = 2
 emission_shape = 1
@@ -89,9 +89,9 @@ linear_accel_random = 0.14
 damping = 100.0
 damping_random = 1.0
 scale = 5.0
-color_ramp = SubResource( 21 )
+color_ramp = SubResource( 6 )
 
-[sub_resource type="Animation" id=16]
+[sub_resource type="Animation" id=9]
 resource_name = "color_lights"
 length = 2.5
 loop = true
@@ -113,7 +113,7 @@ tracks/0/keys = {
 script = ExtResource( 10 )
 
 [node name="coll" type="CollisionShape2D" parent="."]
-shape = SubResource( 23 )
+shape = SubResource( 1 )
 
 [node name="cam_position" type="Position2D" parent="."]
 position = Vector2( 178.585, 0 )
@@ -155,7 +155,7 @@ lifetime = 0.3
 explosiveness = 0.2
 randomness = 0.2
 local_coords = false
-process_material = SubResource( 19 )
+process_material = SubResource( 4 )
 
 [node name="sparkles_right" type="Particles2D" parent="sprites"]
 position = Vector2( 40, 0 )
@@ -165,7 +165,7 @@ lifetime = 0.3
 explosiveness = 0.2
 randomness = 0.2
 local_coords = false
-process_material = SubResource( 19 )
+process_material = SubResource( 4 )
 
 [node name="burner_left" type="Particles2D" parent="sprites"]
 position = Vector2( -18.8366, 11.4962 )
@@ -173,7 +173,7 @@ rotation = 1.74482
 emitting = false
 amount = 250
 local_coords = false
-process_material = SubResource( 22 )
+process_material = SubResource( 7 )
 
 [node name="burner_right" type="Particles2D" parent="sprites"]
 position = Vector2( 17.7285, 13.7122 )
@@ -181,7 +181,7 @@ rotation = 4.5501
 emitting = false
 amount = 250
 local_coords = false
-process_material = SubResource( 22 )
+process_material = SubResource( 7 )
 
 [node name="body" type="Sprite" parent="sprites"]
 self_modulate = Color( 0.12549, 0.12549, 0.12549, 1 )
@@ -217,7 +217,7 @@ position = Vector2( 0, 58.0335 )
 emitting = false
 amount = 250
 local_coords = false
-process_material = SubResource( 15 )
+process_material = SubResource( 8 )
 
 [node name="burner_light" type="Light2D" parent="sprites"]
 position = Vector2( 0, 48 )
@@ -233,7 +233,7 @@ __meta__ = {
 }
 
 [node name="color_lights" type="AnimationPlayer" parent="sprites"]
-anims/color_lights = SubResource( 16 )
+anims/color_lights = SubResource( 9 )
 
 [node name="sfx_scratch" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 11 )

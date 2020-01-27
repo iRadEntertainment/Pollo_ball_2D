@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://sprites/floor1.jpg" type="Texture" id=1]
 [ext_resource path="res://themes/small_theme.tres" type="Theme" id=2]
 [ext_resource path="res://sprites/floor2.png" type="Texture" id=3]
 [ext_resource path="res://sprites/floor3.jpg" type="Texture" id=4]
+[ext_resource path="res://themes/main_theme.tres" type="Theme" id=5]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Node2D
@@ -12,8 +13,11 @@ script/source = "extends Node2D
 onready var pl_preload = preload(\"res://instances/player.tscn\")
 var player
 
-var team_col = Color.blue
-var opposite_team_col = Color.red
+var team_col = Color.cyan
+var opposite_team_col = Color.yellowgreen
+
+var team1_players = []
+var team2_players = []
 
 func _ready():
 	#---- initialize player
@@ -23,6 +27,7 @@ func _ready():
 	player.team_color = team_col
 	player.actual_player = true
 	add_child(player)
+	team1_players.append(player)
 	
 	#---- initialize camera
 	var camera = Camera2D.new()
@@ -39,22 +44,25 @@ func _ready():
 		other_player.global_rotation = other_player_spawn.global_rotation
 		if \"team1\" in other_player_spawn.name:
 			other_player.team_color = team_col
+			team1_players.append(other_player)
 		else:
 			other_player.team_color = opposite_team_col
+			team2_players.append(other_player)
 		add_child(other_player)
 		
 
 func _color_changed(col):
-	player.team_color = col
+	for player in team1_players:
+		player.team_color = col
 "
 
-[sub_resource type="RectangleShape2D" id=3]
+[sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 5888, 128 )
 
-[sub_resource type="RectangleShape2D" id=4]
+[sub_resource type="RectangleShape2D" id=3]
 extents = Vector2( 128, 2816 )
 
-[sub_resource type="GDScript" id=2]
+[sub_resource type="GDScript" id=4]
 script/source = "extends Button
 
 
@@ -62,6 +70,45 @@ func _pressed():
 	release_focus()
 	var col = $col.color
 	owner._color_changed(col)
+"
+
+[sub_resource type="GDScript" id=5]
+script/source = "extends Control
+
+func _ready():
+	hide()
+	for button in $panel/vbox.get_children():
+		if button is Button:
+			button.connect(\"mouse_entered\",audio_server,\"play_hover_button\")
+			button.connect(\"pressed\",audio_server,\"play_press_button\")
+
+func _input(event):
+	if event.is_action_pressed(\"ui_cancel\"):
+		get_tree().paused = !get_tree().paused
+		visible = !visible
+"
+
+[sub_resource type="GDScript" id=6]
+script/source = "extends Button
+
+func _pressed():
+	get_tree().paused = false
+	get_tree().change_scene(\"res://scenes/menu.tscn\")
+	audio_server.stop_all_arena_audio()
+"
+
+[sub_resource type="GDScript" id=7]
+script/source = "extends Button
+
+func _pressed():
+	OS.window_fullscreen = !OS.window_fullscreen
+"
+
+[sub_resource type="GDScript" id=8]
+script/source = "extends Button
+
+func _pressed():
+	get_tree().quit()
 "
 
 [node name="arena1" type="Node2D"]
@@ -130,25 +177,25 @@ __meta__ = {
 position = Vector2( 5888, 128 )
 
 [node name="coll" type="CollisionShape2D" parent="walls/wall1"]
-shape = SubResource( 3 )
+shape = SubResource( 2 )
 
 [node name="wall2" type="StaticBody2D" parent="walls"]
 position = Vector2( 5888, 6016 )
 
 [node name="coll" type="CollisionShape2D" parent="walls/wall2"]
-shape = SubResource( 3 )
+shape = SubResource( 2 )
 
 [node name="wall3" type="StaticBody2D" parent="walls"]
 position = Vector2( 128, 3072 )
 
 [node name="coll" type="CollisionShape2D" parent="walls/wall3"]
-shape = SubResource( 4 )
+shape = SubResource( 3 )
 
 [node name="wall4" type="StaticBody2D" parent="walls"]
 position = Vector2( 11648, 3072 )
 
 [node name="coll" type="CollisionShape2D" parent="walls/wall4"]
-shape = SubResource( 4 )
+shape = SubResource( 3 )
 
 [node name="spawn_points" type="Node2D" parent="."]
 
@@ -181,12 +228,14 @@ position = Vector2( 10906, 2698 )
 rotation = 3.14159
 
 [node name="overlay" type="CanvasLayer" parent="."]
+pause_mode = 2
 
 [node name="gui" type="Control" parent="overlay"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme = ExtResource( 2 )
 __meta__ = {
+"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
@@ -203,7 +252,7 @@ __meta__ = {
 [node name="col1" type="Button" parent="overlay/gui/colors"]
 margin_right = 33.0
 margin_bottom = 23.0
-script = SubResource( 2 )
+script = SubResource( 4 )
 
 [node name="col" type="ColorRect" parent="overlay/gui/colors/col1"]
 anchor_right = 1.0
@@ -222,7 +271,7 @@ __meta__ = {
 margin_top = 25.0
 margin_right = 33.0
 margin_bottom = 48.0
-script = SubResource( 2 )
+script = SubResource( 4 )
 
 [node name="col" type="ColorRect" parent="overlay/gui/colors/col2"]
 anchor_right = 1.0
@@ -241,7 +290,7 @@ __meta__ = {
 margin_top = 50.0
 margin_right = 33.0
 margin_bottom = 73.0
-script = SubResource( 2 )
+script = SubResource( 4 )
 
 [node name="col" type="ColorRect" parent="overlay/gui/colors/col3"]
 anchor_right = 1.0
@@ -260,7 +309,7 @@ __meta__ = {
 margin_top = 75.0
 margin_right = 33.0
 margin_bottom = 98.0
-script = SubResource( 2 )
+script = SubResource( 4 )
 
 [node name="col" type="ColorRect" parent="overlay/gui/colors/col4"]
 anchor_right = 1.0
@@ -270,7 +319,7 @@ margin_top = 4.0
 margin_right = -4.0
 margin_bottom = -4.0
 mouse_filter = 2
-color = Color( 0.0431373, 0.203922, 0.937255, 1 )
+color = Color( 0.415686, 0.776471, 0.972549, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -279,7 +328,7 @@ __meta__ = {
 margin_top = 100.0
 margin_right = 33.0
 margin_bottom = 123.0
-script = SubResource( 2 )
+script = SubResource( 4 )
 
 [node name="col" type="ColorRect" parent="overlay/gui/colors/col5"]
 anchor_right = 1.0
@@ -293,3 +342,63 @@ color = Color( 0.803922, 0.0431373, 0.937255, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="overlay_menu" type="Control" parent="overlay"]
+visible = false
+light_mask = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 5 )
+script = SubResource( 5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="panel" type="Panel" parent="overlay/overlay_menu"]
+light_mask = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -316.0
+margin_top = -93.0
+margin_right = 317.0
+margin_bottom = 92.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="vbox" type="VBoxContainer" parent="overlay/overlay_menu/panel"]
+light_mask = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 32.0
+margin_top = 32.0
+margin_right = -32.0
+margin_bottom = -32.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="menu" type="Button" parent="overlay/overlay_menu/panel/vbox"]
+light_mask = 0
+margin_right = 569.0
+margin_bottom = 36.0
+text = "Main Menu"
+script = SubResource( 6 )
+
+[node name="fullscreen" type="Button" parent="overlay/overlay_menu/panel/vbox"]
+light_mask = 0
+margin_top = 40.0
+margin_right = 569.0
+margin_bottom = 76.0
+text = "Fullscreen"
+script = SubResource( 7 )
+
+[node name="quit" type="Button" parent="overlay/overlay_menu/panel/vbox"]
+light_mask = 0
+margin_top = 80.0
+margin_right = 569.0
+margin_bottom = 116.0
+text = "Quit game"
+script = SubResource( 8 )
