@@ -21,6 +21,7 @@ config/icon="res://icon.png"
 
 [autoload]
 
+mng="*res://autoloads/mng.gd"
 ntw="*res://script/ntw.gd"
 game_manager="*res://autoloads/game_manager.tscn"
 audio_server="*res://autoloads/audio_server.tscn"

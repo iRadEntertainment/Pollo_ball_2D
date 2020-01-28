@@ -29,9 +29,10 @@ var established            = false setget _set_established, _get_established
 var connecting             = false
 
 #--- authentication
-var fl_auth_succeded = false
+puppet var fl_auth_succeded = false setget _auth_updated
+signal auth_updated
 var net_id           = -1
-var developer_name   = ""
+var developer_name   = "" setget _set_developer_name
 
 #--- server datas
 # on connection succeded the server will update
@@ -109,6 +110,7 @@ func disconnect_from_server():
 	connecting       = false
 	reconnect_timer.stop()
 	connection_attempt = 0
+	print("NETWORK: Manual disconnection\n----------------------")
 
 func _attempt_reconnection(): #on reconnect_timer "timeout"
 	connection_attempt += 1
@@ -119,11 +121,13 @@ func _attempt_reconnection(): #on reconnect_timer "timeout"
 		host.close_connection()
 	connect_to_server()
 
-func auth_me():
-	if developer_name:
-		rpc_id(1,"auth_request",[developer_name])
+func auth_me(val):
+	if val:
+		if developer_name:
+			rpc_id(1,"auth_request",net_id,developer_name)
 	else:
-		print("developer name not defined")
+		rpc_id(1,"dissociate_user",net_id)
+		self.developer_name = ""
 
 
 #-------------------------- network signal functions ---------------------------
@@ -143,14 +147,16 @@ func _on_connection_failed():
 func _on_connection_succeeded():
 #	$scr/bg/lb_print.text = str($scr/bg/lb_print.text,"\n","Connection succeded - ")
 	print("NETWORK: connection succeeded")
-	print("NETWORK: my peer ID = %s, server port = %s"%[net_id,host.get_peer_port(1)])
-	print("NETWORK: server IP  = %s"%host.get_peer_address(1))
+	print("NETWORK: My peer ID: %s | developer_name: %s"%[net_id,developer_name])
+	print("NETWORK: Server IP: %s | PORT: %s"%[host.get_peer_address(1),host.get_peer_port(1)])
 	
 	self.established   = true
 	connecting         = false
 	connection_attempt = 0
 	reconnect_timer.stop()
 	set_timer_for_reconnect()
+	
+	auth_me(true)
 
 
 #-------------------------- network communications -----------------------------
@@ -158,10 +164,10 @@ func _on_connection_succeeded():
 func _on_user_connected(id):
 	if !get_tree().is_network_server(): return
 	if id==1: return
-	print("NETWORK: user connected %s, IP: %s"%[id,host.get_peer_address(id)])
+	print("NETWORK: user connected %s, IP: %s"%[id2username(id),host.get_peer_address(id)])
 
 func _on_user_disconnected(id):
-	print("NETWORK: user disconnected %s"%id)
+	print("NETWORK: user disconnected %s"%id2username(id))
 
 func _on_server_disconnected():
 	print("NETWORK: server disconnected")
@@ -216,6 +222,18 @@ func _set_announcements(val):
 	announcements = val
 	emit_signal("announcements_updated",announcements)
 
+func _set_developer_name(val):
+	developer_name = val
+	mng.save_data()
+
+func _auth_updated(val):
+	fl_auth_succeded = val
+	emit_signal("auth_updated",fl_auth_succeded)
+	if fl_auth_succeded:
+		print("NETWORK: connected as | %s |"%developer_name)
+	else:
+		print("NETWORK: connected as Unknown (%s)"%net_id)
+
 #-------------------------------- Server rpc -----------------------------------
 
 remote func receive_last_server_entry(entry):
@@ -229,6 +247,21 @@ remote func receive_file_content(args): # args = [which, content]
 		"data": emit_signal("data_content_updated",content)
 		"dd":   emit_signal("dd_content_updated",content)
 
+
+#--------------------------------- Utilities -----------------------------------
+
+func id2username(id):
+	var username = "Unknown(%s)"%id
+	if id==1:
+		username = "Server"
+	elif id == 0:
+		username = "All"
+	else:
+		for key in existing_developers.keys():
+			if id in existing_developers[key]:
+				username = key
+				break
+	return username
 
 
 
