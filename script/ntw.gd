@@ -23,12 +23,17 @@ const TMR_WAIT_MAX       = 2 #seconds
 var   reconnect_timer    = Timer.new()
 var   connection_attempt = 0
 
+# if the following is active each rset from the server
+# will be printed with the ticks
+var fl_rset_timing_print   = true
+
 #--- flags
-var fl_connected_to_server = false
 var established            = false setget _set_established, _get_established
 var connecting             = false
 
 #--- authentication
+# after calling auth_request(value) the server will update
+# the following flag with rset(this_peer, value)
 puppet var fl_auth_succeded = false setget _auth_updated
 signal auth_updated
 var net_id           = -1
@@ -37,7 +42,8 @@ var developer_name   = "" setget _set_developer_name
 #--- server datas
 # on connection succeded the server will update
 # the following variables with a rset_id(this_peer_id,var)
-puppet var existing_developers = [] setget _set_existing_developers
+puppet var developers_ids      = {} setget _set_developers_ids
+signal developers_ids_updated
 puppet var server_log          = [] setget _set_server_log
 
 puppet var developers_info     = {} setget _set_developers_info
@@ -123,8 +129,10 @@ func _attempt_reconnection(): #on reconnect_timer "timeout"
 func auth_me(val):
 	if val:
 		if developer_name:
+			if fl_rset_timing_print: print("RSET: %s ticks <- auth_me(true)" %OS.get_ticks_msec())
 			rpc_id(1,"auth_request",net_id,developer_name)
 	else:
+		print("NETWORK: manual logout")
 		rpc_id(1,"dissociate_user",net_id)
 		self.developer_name = ""
 
@@ -145,6 +153,8 @@ func _on_connection_failed():
 	
 func _on_connection_succeeded():
 #	$scr/bg/lb_print.text = str($scr/bg/lb_print.text,"\n","Connection succeded - ")
+	if fl_rset_timing_print: print("RSET: %s ticks <- _on_connection_succeeded" %OS.get_ticks_msec())
+	
 	net_id = get_tree().multiplayer.get_network_unique_id()
 	print("NETWORK: connection succeeded")
 	print("NETWORK: My peer ID: %s | developer_name: %s"%[net_id,developer_name])
@@ -187,7 +197,6 @@ func set_timer_for_reconnect():
 func _set_established(val):
 	established = val
 	emit_signal("network_status_changed",val)
-	fl_connected_to_server = val
 
 func _get_established():
 	if (get_tree().get_network_peer()):
@@ -199,12 +208,15 @@ func _get_established():
 		if  established: established = false
 	return established
 
-func _set_existing_developers(val):
-	existing_developers = val
+func _set_developers_ids(val):
+	developers_ids = val
+	emit_signal("developers_ids_updated",developers_ids)
+	if fl_rset_timing_print: print("RSET: %s ticks <- developers_ids" %OS.get_ticks_msec())
 
 func _set_server_log(val):
 	server_log = val
 	emit_signal("server_log_updated")
+	if fl_rset_timing_print: print("RSET: %s ticks <- server_log" %OS.get_ticks_msec())
 
 func _test_updated(val):
 	test = val
@@ -213,14 +225,17 @@ func _test_updated(val):
 func _set_developers_info(val):
 	developers_info = val
 	emit_signal("developers_info_updated",developers_info)
+	if fl_rset_timing_print: print("RSET: %s ticks <- developers_info" %OS.get_ticks_msec())
 
 func _set_tasks(val):
 	tasks = val
 	emit_signal("tasks_updated",tasks)
+	if fl_rset_timing_print: print("RSET: %s ticks <- tasks" %OS.get_ticks_msec())
 
 func _set_announcements(val):
 	announcements = val
 	emit_signal("announcements_updated",announcements)
+	if fl_rset_timing_print: print("RSET: %s ticks <- announcements" %OS.get_ticks_msec())
 
 func _set_developer_name(val):
 	developer_name = val
@@ -228,6 +243,7 @@ func _set_developer_name(val):
 
 func _auth_updated(val):
 	fl_auth_succeded = val
+	if fl_rset_timing_print: print("RSET: %s ticks <- _auth_updated" %OS.get_ticks_msec())
 	emit_signal("auth_updated",fl_auth_succeded)
 	if fl_auth_succeded:
 		print("NETWORK: connected as | %s |"%developer_name)
@@ -257,8 +273,8 @@ func id2username(id):
 	elif id == 0:
 		username = "All"
 	else:
-		for key in existing_developers.keys():
-			if id in existing_developers[key]:
+		for key in developers_ids:
+			if id in developers_ids[key]:
 				username = key
 				break
 	return username

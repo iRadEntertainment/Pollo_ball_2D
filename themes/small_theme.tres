@@ -60,7 +60,7 @@ bg_color = Color( 0, 0, 0, 0.372549 )
 content_margin_left = 8.0
 content_margin_right = 8.0
 
-[sub_resource type="StyleBoxFlat" id=13]
+[sub_resource type="StyleBoxFlat" id=9]
 content_margin_left = 18.0
 content_margin_right = 18.0
 content_margin_top = 18.0
@@ -69,7 +69,7 @@ bg_color = Color( 0.505882, 0.0470588, 0.0470588, 1 )
 corner_radius_top_left = 12
 corner_radius_bottom_right = 12
 
-[sub_resource type="StyleBoxFlat" id=14]
+[sub_resource type="StyleBoxFlat" id=10]
 content_margin_left = 18.0
 content_margin_right = 18.0
 content_margin_top = 18.0
@@ -77,18 +77,18 @@ content_margin_bottom = 18.0
 bg_color = Color( 0.505882, 0.0470588, 0.0470588, 1 )
 corner_radius_top_left = 12
 
-[sub_resource type="StyleBoxFlat" id=15]
+[sub_resource type="StyleBoxFlat" id=11]
 content_margin_left = 4.0
 content_margin_right = 4.0
 content_margin_top = 4.0
 content_margin_bottom = 4.0
 bg_color = Color( 0.0392157, 0.0392157, 0.0392157, 0.835294 )
 
-[sub_resource type="StyleBoxEmpty" id=9]
+[sub_resource type="StyleBoxEmpty" id=12]
 
-[sub_resource type="StyleBoxFlat" id=10]
+[sub_resource type="StyleBoxFlat" id=13]
 
-[sub_resource type="StyleBoxFlat" id=11]
+[sub_resource type="StyleBoxFlat" id=14]
 content_margin_left = 12.0
 content_margin_right = 12.0
 content_margin_top = 12.0
@@ -98,14 +98,14 @@ border_width_bottom = 2
 border_color = Color( 0.929412, 0.831373, 0.54902, 1 )
 corner_radius_bottom_right = 12
 
-[sub_resource type="DynamicFont" id=12]
+[sub_resource type="DynamicFont" id=15]
 size = 12
 use_mipmaps = true
 use_filter = true
 font_data = ExtResource( 2 )
 
 [resource]
-default_font = SubResource( 12 )
+default_font = SubResource( 15 )
 Button/colors/font_color = Color( 0.88, 0.88, 0.88, 1 )
 Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
 Button/colors/font_color_hover = Color( 0.94, 0.94, 0.94, 1 )
@@ -148,11 +148,11 @@ OptionButton/constants/hseparation = 7
 OptionButton/fonts/font = null
 OptionButton/icons/arrow = null
 OptionButton/styles/disabled = null
-OptionButton/styles/focus = SubResource( 13 )
+OptionButton/styles/focus = SubResource( 9 )
 OptionButton/styles/hover = null
 OptionButton/styles/normal = null
-OptionButton/styles/pressed = SubResource( 14 )
-PanelContainer/styles/panel = SubResource( 15 )
+OptionButton/styles/pressed = SubResource( 10 )
+PanelContainer/styles/panel = SubResource( 11 )
 PopupMenu/colors/font_color = Color( 0.88, 0.88, 0.88, 1 )
 PopupMenu/colors/font_color_accel = Color( 0.7, 0.7, 0.7, 0.8 )
 PopupMenu/colors/font_color_disabled = Color( 0.4, 0.4, 0.4, 0.8 )
@@ -165,9 +165,9 @@ PopupMenu/icons/radio_checked = null
 PopupMenu/icons/radio_unchecked = null
 PopupMenu/icons/submenu = null
 PopupMenu/icons/unchecked = null
-PopupMenu/styles/hover = SubResource( 9 )
-PopupMenu/styles/labeled_separator_left = SubResource( 10 )
+PopupMenu/styles/hover = SubResource( 12 )
+PopupMenu/styles/labeled_separator_left = SubResource( 13 )
 PopupMenu/styles/labeled_separator_right = null
-PopupMenu/styles/panel = SubResource( 11 )
+PopupMenu/styles/panel = SubResource( 14 )
 PopupMenu/styles/panel_disabled = null
 PopupMenu/styles/separator = null
