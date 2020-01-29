@@ -1,4 +1,4 @@
-[gd_scene load_steps=71 format=2]
+[gd_scene load_steps=75 format=2]
 
 [ext_resource path="res://themes/main_theme.tres" type="Theme" id=1]
 [ext_resource path="res://themes/fonts/nk57-monospace/nk57-monospace-no-rg.ttf" type="DynamicFontData" id=2]
@@ -317,7 +317,7 @@ func _pressed():
 	mng.fullscreen = OS.window_fullscreen
 "
 
-[sub_resource type="GDScript" id=22]
+[sub_resource type="GDScript" id=19]
 script/source = "extends CheckBox
 
 func _ready():
@@ -353,7 +353,7 @@ func _toggled(button_pressed):
 	mng.ambient_on = !button_pressed
 "
 
-[sub_resource type="GDScript" id=19]
+[sub_resource type="GDScript" id=22]
 script/source = "extends CheckBox
 
 func _ready():
@@ -430,7 +430,7 @@ func _update_status_icon(val):
 		$ico.modulate = Color.crimson
 "
 
-[sub_resource type="GDScript" id=47]
+[sub_resource type="GDScript" id=30]
 script/source = "extends Label
 
 func _ready():
@@ -452,7 +452,7 @@ func _update(val):
 	text = val
 "
 
-[sub_resource type="GDScript" id=48]
+[sub_resource type="GDScript" id=32]
 script/source = "extends LineEdit
 
 func _ready():
@@ -467,7 +467,7 @@ func _is_editable(val):
 	editable = !val
 "
 
-[sub_resource type="GDScript" id=49]
+[sub_resource type="GDScript" id=33]
 script/source = "extends Button
 
 func _ready():
@@ -490,7 +490,7 @@ func _ntw_status_changed(val):
 	disabled = !val
 "
 
-[sub_resource type="GDScript" id=51]
+[sub_resource type="GDScript" id=34]
 script/source = "extends Button
 
 func _ready():
@@ -511,36 +511,74 @@ func _ntw_status_changed(val):
 	disabled = !val
 "
 
-[sub_resource type="DynamicFont" id=30]
+[sub_resource type="DynamicFont" id=35]
 size = 28
 outline_color = Color( 0.505882, 0.0470588, 0.0470588, 1 )
 use_filter = true
 font_data = ExtResource( 3 )
 
-[sub_resource type="GDScript" id=50]
+[sub_resource type="GDScript" id=36]
 script/source = "extends Button
 
 func _pressed():
 	$\"../../..\".hide()
 "
 
-[sub_resource type="GDScript" id=32]
-script/source = "extends ColorRect
+[sub_resource type="GDScript" id=37]
+script/source = "extends PanelContainer
 
 func _ready():
 	ntw.connect(\"announcements_updated\",self,\"update_news\")
+	$vbox/exp.hide()
 
 func update_news(val):
 	ann_id = 0
 	show_announcement(ann_id)
+	populate_expanded_box()
 
 func show_announcement(id):
-	$hbox/user.text = ntw.announcements[id][0]
-	$hbox/text.text = ntw.announcements[id][1]
+	if not ntw.announcements.empty():
+		$vbox/bg/hbox/user.text = ntw.announcements[id][0]
+		$vbox/bg/hbox/text.text = ntw.announcements[id][1]
+		# start the _process(d) for announcements loop if there is more than one announcement
+		set_process(ntw.announcements.size() > 1)
+
+func populate_expanded_box():
+	for ann_instance in $vbox/exp.get_children():
+		if ann_instance.name != \"add_news\":
+			ann_instance.queue_free()
+	
+	if not ntw.announcements.empty():
+		for id_ann in range(ntw.announcements.size()):
+			var row = HBoxContainer.new()
+			var ann_user = Label.new()
+			ann_user.rect_min_size.x = $vbox/bg/hbox/user.rect_min_size.x
+			ann_user.text = ntw.announcements[id_ann][0]
+			var sep1 = VSeparator.new()
+			var ann_mess = Label.new()
+			ann_mess.text = ntw.announcements[id_ann][1]
+			ann_mess.size_flags_horizontal = SIZE_EXPAND_FILL
+			
+			var sep2 = VSeparator.new()
+			var delete_button = Button.new()
+			delete_button.text = \"delete\"
+			delete_button.connect(\"pressed\",self,\"delete_announcement\",[id_ann])
+			
+			for node in [ann_user, sep1, ann_mess, sep2, delete_button]:
+				row.add_child(node)
+			
+			$vbox/exp.add_child(row)
+	
+#	$vbox/exp.move_child($vbox/exp/add_news, ntw.announcements.size())
+
+func delete_announcement(id_ann):
+	ntw.rpc_id(1,\"remove_announcement\",id_ann)
+
 
 var ann_id = 0
 var time_elapsed = 0
 var scroll_time = 4
+
 func _process(d):
 	time_elapsed += d
 	if time_elapsed > scroll_time:
@@ -551,19 +589,59 @@ func _process(d):
 		show_announcement(ann_id)
 "
 
-[sub_resource type="StyleBoxEmpty" id=33]
+[sub_resource type="StyleBoxEmpty" id=38]
 content_margin_left = 8.0
 content_margin_right = 8.0
 
-[sub_resource type="GDScript" id=46]
+[sub_resource type="StyleBoxEmpty" id=53]
+
+[sub_resource type="GDScript" id=39]
 script/source = "extends ToolButton
 
 func _pressed():
 	release_focus()
-	$\"../../news_exp\".visible = !$\"../../news_exp\".visible
+	$\"../../exp\".visible = !$\"../../exp\".visible
 "
 
-[sub_resource type="GDScript" id=34]
+[sub_resource type="GDScript" id=55]
+script/source = "extends HBoxContainer
+
+func _ready():
+	hide()
+	ntw.connect(\"auth_updated\",self,\"_auth_updated\")
+
+func _auth_updated(val):
+	visible = val
+"
+
+[sub_resource type="GDScript" id=54]
+script/source = "extends Button
+
+func _pressed():
+	release_focus()
+	if $\"../ann_line\".text == \"\":
+		return
+	var ann = [ntw.developer_name, $\"../ann_line\".text]
+	
+	ntw.rpc_id(1,\"add_announcement\",ann)
+	
+	$\"../ann_line\".clear()
+	
+"
+
+[sub_resource type="StyleBoxFlat" id=40]
+content_margin_left = 4.0
+content_margin_right = 4.0
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.470588, 0.0117647, 0.0117647, 1 )
+
+[sub_resource type="GDScript" id=41]
 script/source = "extends TextEdit
 
 func _ready():
@@ -580,7 +658,7 @@ func _update_text(content):
 	text = content
 "
 
-[sub_resource type="GDScript" id=35]
+[sub_resource type="GDScript" id=42]
 script/source = "extends Button
 
 func _pressed():
@@ -593,7 +671,7 @@ func _pressed():
 	ntw.rpc_id(1, \"send_file_content\", \"dd\")
 "
 
-[sub_resource type="GDScript" id=36]
+[sub_resource type="GDScript" id=43]
 script/source = "extends Button
 
 func _pressed():
@@ -607,7 +685,7 @@ func _pressed():
 	ntw.rpc_id(1, \"override_file\", \"dd\", content)
 "
 
-[sub_resource type="GDScript" id=37]
+[sub_resource type="GDScript" id=44]
 script/source = "extends Button
 
 func _pressed():
@@ -620,7 +698,7 @@ func _pressed():
 	ntw.rpc_id(1, \"send_file_content\", \"dd\")
 "
 
-[sub_resource type="GDScript" id=38]
+[sub_resource type="GDScript" id=45]
 script/source = "extends Button
 
 func _pressed():
@@ -629,7 +707,7 @@ func _pressed():
 
 "
 
-[sub_resource type="GDScript" id=39]
+[sub_resource type="GDScript" id=46]
 script/source = "extends Button
 
 func _ready():
@@ -646,14 +724,14 @@ func _disable_mode(val):
 	disabled = !val
 "
 
-[sub_resource type="GDScript" id=40]
+[sub_resource type="GDScript" id=47]
 script/source = "extends Button
 
 func _pressed():
 	ntw.rpc_id(1,\"manual_restart\")
 "
 
-[sub_resource type="GDScript" id=41]
+[sub_resource type="GDScript" id=48]
 script/source = "extends TextEdit
 
 func _ready():
@@ -677,7 +755,7 @@ func parse_log_message(line):
 	return format_str
 "
 
-[sub_resource type="GDScript" id=42]
+[sub_resource type="GDScript" id=49]
 script/source = "extends TextEdit
 
 func _ready():
@@ -687,7 +765,7 @@ func _update_text(content):
 	text = content
 "
 
-[sub_resource type="GDScript" id=43]
+[sub_resource type="GDScript" id=50]
 script/source = "extends Button
 
 func _pressed():
@@ -700,7 +778,7 @@ func _pressed():
 	ntw.rpc_id(1, \"send_file_content\", \"ntw\")
 "
 
-[sub_resource type="GDScript" id=44]
+[sub_resource type="GDScript" id=51]
 script/source = "extends Button
 
 func _pressed():
@@ -714,7 +792,7 @@ func _pressed():
 	ntw.rpc_id(1, \"override_file\", \"ntw\", content)
 "
 
-[sub_resource type="GDScript" id=45]
+[sub_resource type="GDScript" id=52]
 script/source = "extends Button
 
 func _pressed():
@@ -1094,7 +1172,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 text = "sFX GUI"
 align = 1
-script = SubResource( 22 )
+script = SubResource( 19 )
 
 [node name="sfx_toggle" type="CheckBox" parent="box_main/cnt_right/btn_cont/grid"]
 margin_left = 182.0
@@ -1125,7 +1203,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 text = "music"
 align = 1
-script = SubResource( 19 )
+script = SubResource( 22 )
 
 [node name="hsep2" type="HSeparator" parent="box_main/cnt_right/btn_cont"]
 margin_top = 403.0
@@ -1255,7 +1333,7 @@ size_flags_vertical = 7
 text = "disconnected"
 align = 1
 valign = 1
-script = SubResource( 47 )
+script = SubResource( 30 )
 
 [node name="vsep" type="VSeparator" parent="developer_tab/vbox/top"]
 margin_left = 140.0
@@ -1284,7 +1362,7 @@ rect_min_size = Vector2( 160, 0 )
 align = 1
 expand_to_text_length = true
 placeholder_text = "name"
-script = SubResource( 48 )
+script = SubResource( 32 )
 
 [node name="log_in" type="Button" parent="developer_tab/vbox/top"]
 margin_left = 312.0
@@ -1292,7 +1370,7 @@ margin_right = 368.0
 margin_bottom = 36.0
 theme = ExtResource( 5 )
 text = "Log in"
-script = SubResource( 49 )
+script = SubResource( 33 )
 
 [node name="log_out" type="Button" parent="developer_tab/vbox/top"]
 visible = false
@@ -1301,7 +1379,7 @@ margin_right = 436.0
 margin_bottom = 36.0
 theme = ExtResource( 5 )
 text = "Log out"
-script = SubResource( 51 )
+script = SubResource( 34 )
 
 [node name="vsep2" type="VSeparator" parent="developer_tab/vbox/top"]
 margin_left = 372.0
@@ -1314,7 +1392,7 @@ margin_right = 1228.0
 margin_bottom = 36.0
 size_flags_horizontal = 3
 size_flags_vertical = 7
-custom_fonts/font = SubResource( 30 )
+custom_fonts/font = SubResource( 35 )
 text = "Developer Room"
 align = 2
 valign = 1
@@ -1328,20 +1406,31 @@ margin_right = 1264.0
 margin_bottom = 36.0
 theme = ExtResource( 5 )
 text = " x "
-script = SubResource( 50 )
+script = SubResource( 36 )
 
-[node name="news" type="ColorRect" parent="developer_tab/vbox"]
+[node name="news" type="PanelContainer" parent="developer_tab/vbox"]
 margin_top = 44.0
 margin_right = 1264.0
-margin_bottom = 80.0
+margin_bottom = 124.0
+theme = ExtResource( 5 )
+script = SubResource( 37 )
+
+[node name="vbox" type="VBoxContainer" parent="developer_tab/vbox/news"]
+margin_left = 4.0
+margin_top = 4.0
+margin_right = 1260.0
+margin_bottom = 76.0
+
+[node name="bg" type="ColorRect" parent="developer_tab/vbox/news/vbox"]
+margin_right = 1256.0
+margin_bottom = 36.0
 rect_min_size = Vector2( 0, 36 )
 color = Color( 0.195313, 0.0221252, 0.0221252, 1 )
-script = SubResource( 32 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="hbox" type="HBoxContainer" parent="developer_tab/vbox/news"]
+[node name="hbox" type="HBoxContainer" parent="developer_tab/vbox/news/vbox/bg"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_constants/separation = 0
@@ -1349,12 +1438,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="user" type="Label" parent="developer_tab/vbox/news/hbox"]
+[node name="user" type="Label" parent="developer_tab/vbox/news/vbox/bg/hbox"]
 margin_right = 160.0
 margin_bottom = 36.0
 rect_min_size = Vector2( 160, 0 )
 size_flags_vertical = 7
-custom_styles/normal = SubResource( 33 )
+custom_styles/normal = SubResource( 38 )
 text = "Client"
 align = 2
 valign = 1
@@ -1362,40 +1451,68 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VSeparator" type="VSeparator" parent="developer_tab/vbox/news/hbox"]
+[node name="sep" type="VSeparator" parent="developer_tab/vbox/news/vbox/bg/hbox"]
 margin_left = 160.0
 margin_right = 164.0
 margin_bottom = 36.0
 custom_constants/separation = 4
 
-[node name="text" type="Label" parent="developer_tab/vbox/news/hbox"]
+[node name="text" type="Label" parent="developer_tab/vbox/news/vbox/bg/hbox"]
 margin_left = 164.0
-margin_right = 1264.0
+margin_right = 1256.0
 margin_bottom = 36.0
 size_flags_horizontal = 3
 size_flags_vertical = 7
-custom_styles/normal = SubResource( 33 )
+custom_styles/normal = SubResource( 38 )
 text = "non connesso al server principale"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="tool_btn" type="ToolButton" parent="developer_tab/vbox/news"]
+[node name="tool_btn" type="ToolButton" parent="developer_tab/vbox/news/vbox/bg"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = SubResource( 46 )
+custom_styles/pressed = SubResource( 53 )
+custom_styles/focus = SubResource( 53 )
+script = SubResource( 39 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="news_exp" type="Panel" parent="developer_tab/vbox"]
-margin_top = 88.0
-margin_right = 1264.0
-margin_bottom = 88.0
+[node name="exp" type="VBoxContainer" parent="developer_tab/vbox/news/vbox"]
+margin_top = 40.0
+margin_right = 1256.0
+margin_bottom = 72.0
+
+[node name="add_news" type="HBoxContainer" parent="developer_tab/vbox/news/vbox/exp"]
+margin_right = 1256.0
+margin_bottom = 32.0
+script = SubResource( 55 )
+
+[node name="ann_line" type="LineEdit" parent="developer_tab/vbox/news/vbox/exp/add_news"]
+margin_right = 1108.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 0, 32 )
+size_flags_horizontal = 3
+expand_to_text_length = true
+placeholder_text = "type your announcement here"
+
+[node name="sep" type="VSeparator" parent="developer_tab/vbox/news/vbox/exp/add_news"]
+margin_left = 1112.0
+margin_right = 1116.0
+margin_bottom = 32.0
+custom_constants/separation = 4
+
+[node name="add_news" type="Button" parent="developer_tab/vbox/news/vbox/exp/add_news"]
+margin_left = 1120.0
+margin_right = 1256.0
+margin_bottom = 32.0
+text = "add announcement"
+script = SubResource( 54 )
 
 [node name="tab_cont" type="TabContainer" parent="developer_tab/vbox"]
-margin_top = 96.0
+margin_top = 132.0
 margin_right = 1264.0
 margin_bottom = 736.0
 size_flags_vertical = 3
@@ -1411,7 +1528,10 @@ __meta__ = {
 [node name="Developers" type="Control" parent="developer_tab/vbox/tab_cont"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = 28.0
+margin_left = 8.0
+margin_top = 36.0
+margin_right = -8.0
+margin_bottom = -8.0
 
 [node name="scroll" type="ScrollContainer" parent="developer_tab/vbox/tab_cont/Developers"]
 anchor_right = 1.0
@@ -1421,25 +1541,61 @@ __meta__ = {
 }
 
 [node name="vbox" type="VBoxContainer" parent="developer_tab/vbox/tab_cont/Developers/scroll"]
-margin_right = 1264.0
-margin_bottom = 612.0
+margin_right = 1248.0
+margin_bottom = 560.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="dev_list_inst" type="Control" parent="developer_tab/vbox/tab_cont/Developers/scroll/vbox"]
-margin_right = 1264.0
+[node name="dev_inst" type="PanelContainer" parent="developer_tab/vbox/tab_cont/Developers/scroll/vbox"]
+margin_right = 1248.0
+margin_bottom = 58.0
+custom_styles/panel = SubResource( 40 )
+
+[node name="hbox" type="HBoxContainer" parent="developer_tab/vbox/tab_cont/Developers/scroll/vbox/dev_inst"]
+margin_left = 4.0
+margin_top = 4.0
+margin_right = 1244.0
+margin_bottom = 54.0
+
+[node name="username" type="Label" parent="developer_tab/vbox/tab_cont/Developers/scroll/vbox/dev_inst/hbox"]
+margin_top = 15.0
+margin_right = 160.0
+margin_bottom = 35.0
+text = "Dario \"iRad\" De Vita"
+
+[node name="tasks" type="VBoxContainer" parent="developer_tab/vbox/tab_cont/Developers/scroll/vbox/dev_inst/hbox"]
+margin_left = 164.0
+margin_right = 364.0
+margin_bottom = 50.0
+rect_min_size = Vector2( 200, 0 )
+theme = ExtResource( 5 )
+
+[node name="primary" type="Button" parent="developer_tab/vbox/tab_cont/Developers/scroll/vbox/dev_inst/hbox/tasks"]
+margin_right = 200.0
+margin_bottom = 23.0
+
+[node name="secondary" type="Button" parent="developer_tab/vbox/tab_cont/Developers/scroll/vbox/dev_inst/hbox/tasks"]
+margin_top = 27.0
+margin_right = 200.0
+margin_bottom = 50.0
 
 [node name="Tasks" type="Control" parent="developer_tab/vbox/tab_cont"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = 28.0
+margin_left = 32.0
+margin_top = 60.0
+margin_right = -32.0
+margin_bottom = -32.0
 
 [node name="Design Document" type="Control" parent="developer_tab/vbox/tab_cont"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = 28.0
+margin_left = 32.0
+margin_top = 60.0
+margin_right = -32.0
+margin_bottom = -32.0
 
 [node name="vbox" type="VBoxContainer" parent="developer_tab/vbox/tab_cont/Design Document"]
 anchor_right = 1.0
@@ -1460,7 +1616,7 @@ size_flags_vertical = 3
 text = "Design Document"
 readonly = true
 smooth_scrolling = true
-script = SubResource( 34 )
+script = SubResource( 41 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1479,7 +1635,7 @@ __meta__ = {
 margin_right = 40.0
 margin_bottom = 23.0
 text = "Edit"
-script = SubResource( 35 )
+script = SubResource( 42 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1490,7 +1646,7 @@ margin_right = 124.0
 margin_bottom = 23.0
 disabled = true
 text = "Save file"
-script = SubResource( 36 )
+script = SubResource( 43 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1501,7 +1657,7 @@ margin_right = 184.0
 margin_bottom = 23.0
 disabled = true
 text = "cancel"
-script = SubResource( 37 )
+script = SubResource( 44 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1510,7 +1666,10 @@ __meta__ = {
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = 28.0
+margin_left = 32.0
+margin_top = 60.0
+margin_right = -32.0
+margin_bottom = -32.0
 
 [node name="vbox" type="VBoxContainer" parent="developer_tab/vbox/tab_cont/Server"]
 anchor_right = 1.0
@@ -1537,21 +1696,21 @@ __meta__ = {
 margin_right = 88.0
 margin_bottom = 23.0
 text = "server log"
-script = SubResource( 38 )
+script = SubResource( 45 )
 
 [node name="ntw" type="Button" parent="developer_tab/vbox/tab_cont/Server/vbox/btns"]
 margin_left = 92.0
 margin_right = 268.0
 margin_bottom = 23.0
 text = "server network script"
-script = SubResource( 39 )
+script = SubResource( 46 )
 
 [node name="restart" type="Button" parent="developer_tab/vbox/tab_cont/Server/vbox/btns"]
 margin_left = 272.0
 margin_right = 392.0
 margin_bottom = 23.0
 text = "restart server"
-script = SubResource( 40 )
+script = SubResource( 47 )
 
 [node name="tab" type="TabContainer" parent="developer_tab/vbox/tab_cont/Server/vbox"]
 margin_top = 39.0
@@ -1565,12 +1724,20 @@ tabs_visible = false
 [node name="server_log" type="TextEdit" parent="developer_tab/vbox/tab_cont/Server/vbox/tab"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = SubResource( 41 )
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = -8.0
+script = SubResource( 48 )
 
 [node name="ntw_script" type="VBoxContainer" parent="developer_tab/vbox/tab_cont/Server/vbox/tab"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = 32.0
+margin_top = 32.0
+margin_right = -32.0
+margin_bottom = -32.0
 
 [node name="text_edit" type="TextEdit" parent="developer_tab/vbox/tab_cont/Server/vbox/tab/ntw_script"]
 margin_right = 1168.0
@@ -1583,7 +1750,7 @@ highlight_current_line = true
 syntax_highlighting = true
 show_line_numbers = true
 draw_tabs = true
-script = SubResource( 42 )
+script = SubResource( 49 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1602,7 +1769,7 @@ __meta__ = {
 margin_right = 40.0
 margin_bottom = 23.0
 text = "Edit"
-script = SubResource( 43 )
+script = SubResource( 50 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1613,7 +1780,7 @@ margin_right = 124.0
 margin_bottom = 23.0
 disabled = true
 text = "Save file"
-script = SubResource( 44 )
+script = SubResource( 51 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1624,7 +1791,7 @@ margin_right = 184.0
 margin_bottom = 23.0
 disabled = true
 text = "cancel"
-script = SubResource( 45 )
+script = SubResource( 52 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

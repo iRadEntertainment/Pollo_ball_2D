@@ -1,3 +1,54 @@
-[gd_scene format=2]
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://sprites/vfx/electric_rope.png" type="Texture" id=1]
+[ext_resource path="res://script/rope.gd" type="Script" id=2]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 32, 8 )
+
+[sub_resource type="CanvasItemMaterial" id=2]
+blend_mode = 1
+light_mode = 1
+
+[sub_resource type="Animation" id=3]
+resource_name = "loop"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.6 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 0, 7 ]
+}
 
 [node name="rope" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="section1" type="RigidBody2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+gravity_scale = 0.0
+
+[node name="coll" type="CollisionShape2D" parent="section1"]
+position = Vector2( 32, 0 )
+shape = SubResource( 1 )
+
+[node name="sprite" type="Sprite" parent="section1"]
+material = SubResource( 2 )
+position = Vector2( 32, 0 )
+rotation = 1.5708
+scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 1 )
+hframes = 8
+
+[node name="anim" type="AnimationPlayer" parent="section1/sprite"]
+autoplay = "loop"
+anims/loop = SubResource( 3 )
+
+[node name="end_pos" type="Position2D" parent="."]
+position = Vector2( 384, 0 )

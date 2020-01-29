@@ -75,7 +75,7 @@ func _ready():
 	set_timer_for_reconnect()
 	add_child(reconnect_timer)
 	reconnect_timer.connect("timeout",self,"_attempt_reconnection")
-	
+	#set server as network master
 	set_network_master(1)
 	connect_to_server()
 
@@ -97,7 +97,6 @@ func connect_to_server():
 	
 	get_tree().set_network_peer(null)
 	get_tree().set_network_peer(host)
-	net_id = get_tree().multiplayer.get_network_unique_id()
 	
 	#start timer for reconnection attempts
 	connecting = true
@@ -146,6 +145,7 @@ func _on_connection_failed():
 	
 func _on_connection_succeeded():
 #	$scr/bg/lb_print.text = str($scr/bg/lb_print.text,"\n","Connection succeded - ")
+	net_id = get_tree().multiplayer.get_network_unique_id()
 	print("NETWORK: connection succeeded")
 	print("NETWORK: My peer ID: %s | developer_name: %s"%[net_id,developer_name])
 	print("NETWORK: Server IP: %s | PORT: %s"%[host.get_peer_address(1),host.get_peer_port(1)])

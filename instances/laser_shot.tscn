@@ -16,6 +16,9 @@ var lifetime = 1.5 #sec
 var player_owner = null
 var bounces = 2
 
+#explosion
+onready var explosion = preload(\"res://instances/explosion.tscn\")
+
 func _ready():
 	if player_owner:
 		add_collision_exception_with(player_owner)
@@ -24,6 +27,8 @@ func _ready():
 	$timer.wait_time = lifetime
 	$timer.start()
 	velocity = Vector2(laser_speed ,0).rotated(rotation) + spacecraft_velocity
+	
+	z_index = floor(height+1)
 
 #func _on_VisibilityNotifier2D_screen_exited():
 #	queue_free()
@@ -35,17 +40,23 @@ func _physics_process(d):
 	$light.color.a = lerp(0,lifetime,$timer.time_left)
 	if collision:
 		if collision.collider.has_method(\"get_hit_by_laser\"):
-			collision.collider.get_hit_by_laser(velocity*d)
-			explode()
+			if abs(collision.collider.height - height) > 0.5:
+				add_collision_exception_with(collision.collider)
+			else:
+				collision.collider.get_hit_by_laser(velocity)
+				explode(collision.position, collision.normal)
 		elif bounces <= 0:
-			explode()
+			explode(collision.position, collision.normal)
 		elif collision.collider is StaticBody2D:
 			velocity = velocity.bounce(collision.normal)
 			bounces -= 1
 
 
-func explode():
-	print(\"kabooom\")
+func explode(pos, norm: Vector2):
+	var exp_instance = explosion.instance()
+	exp_instance.global_position = pos
+	exp_instance.global_rotation = norm.angle()
+	get_parent().add_child(exp_instance)
 	queue_free()
 
 
@@ -58,6 +69,8 @@ radius = 4.92313
 height = 101.007
 
 [node name="laser_shot" type="KinematicBody2D"]
+collision_layer = 3
+collision_mask = 3
 script = SubResource( 1 )
 
 [node name="sprite" type="Sprite" parent="."]
@@ -67,6 +80,7 @@ vframes = 11
 frame = 9
 
 [node name="coll" type="CollisionShape2D" parent="."]
+visible = false
 rotation = -1.57079
 shape = SubResource( 2 )
 

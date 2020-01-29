@@ -27,6 +27,7 @@ var trust_vector = Vector2()
 
 #weapons
 onready var laser_preload = preload("res://instances/laser_shot.tscn")
+onready var rope_preload  = preload("res://instances/rope.tscn")
 var firing = false
 var laser_cooldown = 0.15
 var firing_time_left = 0
@@ -57,6 +58,7 @@ func _process(d):
 			trust_vector += -Vector2(trust,0).rotated(rotation)/2
 			
 		if Input.is_action_pressed("game_fire"):		fire_laser()
+		if Input.is_action_just_pressed("game_action"):	rope_activated()
 		if Input.is_action_pressed("ui_left"):			rotation -= rotation_speed*d
 		if Input.is_action_pressed("ui_right"):			rotation += rotation_speed*d
 		if Input.is_action_pressed("game_dive_up"):		height += dive_speed*d
@@ -101,10 +103,10 @@ func _process(d):
 	$sprites/sparkles_left.emitting  = scratching_groud
 	$sprites/sparkles_right.emitting = scratching_groud
 	if scratching_groud:
-		if not $sfx_scratch.playing:
-			$sfx_scratch.play()
+		if not $sfx/sfx_scratch.playing:
+			$sfx/sfx_scratch.play()
 	else:
-		$sfx_scratch.stop()
+		$sfx/sfx_scratch.stop()
 	
 
 var firing_laser_sx = true
@@ -132,9 +134,27 @@ func fire_laser():
 	laser.global_rotation = $sprites/las1_pos.global_rotation
 	get_parent().add_child(laser)
 
+var fl_rope_attached = false
+var rope_ref = null
+func rope_activated():
+	if not rope_ref:
+		if not fl_rope_attached:
+			var new_rope = rope_preload.instance()
+			new_rope.global_position = $sprites/grappling_cannon/grap_anchor.global_position
+#			new_rope.global_rotation = $sprites/grappling_cannon/grap_anchor.global_rotation
+			new_rope.player_ref = self
+			new_rope.anchor     = $sprites/grappling_cannon/grap_anchor
+			new_rope.hook       = get_parent().get_node("bomb")
+			rope_ref = new_rope
+			get_parent().add_child(new_rope)
+	elif rope_ref:
+		fl_rope_attached = false
+		rope_ref.queue_free()
+		rope_ref = null
 
 func get_hit_by_laser(laser_velocity):
-	vec_mov += laser_velocity*2
+	var impact_force = laser_velocity - vec_mov
+	vec_mov += impact_force/10
 	
 
 func get_team_color():
