@@ -11,8 +11,9 @@ var ang_offset = []
 var ang_constr = []
 
 var start : Vector2
+var start_point_given : Vector2
 
-var target_treshold = 0.01
+var target_treshold = 0.1
 var fl_contact      = false
 
 
@@ -23,16 +24,22 @@ func set_nodes(array, constraint_array = []):
 		ang_constr = constraint_array
 	
 	#calculate points and lenghts
-	start = nodes_arr[0].global_position
-	for node in nodes_arr:
-		points_arr.append(node.global_position)
+	start = start_point_given if start_point_given else nodes_arr[0].global_position
+	
+	if array[0] is Vector2:
+		points_arr = array.duplicate()
+	else:
+		for node in nodes_arr:
+			points_arr.append(node.global_position)
 	
 	for i in range (points_arr.size()-1):
 		bones_arr.append(points_arr[i+1] - points_arr[i])
-		ang_offset.append( bones_arr[i].angle_to( Vector2(1,0) ) )
+		ang_offset.append( bones_arr[i].angle_to(Vector2(1,0)) )
 
-func reach_target(goal): # PROCESSED
-	# check if on goal already
+
+
+func reach_target(goal, apply_transf := true): # PROCESSED
+	# check if goal is reached
 	if   ( points_arr[points_arr.size()-1] - goal ).length() < target_treshold:
 		if !fl_contact: fl_contact = true
 	elif ( points_arr[points_arr.size()-1] - goal ).length() < target_treshold/10:
@@ -41,7 +48,8 @@ func reach_target(goal): # PROCESSED
 		if fl_contact: fl_contact = false
 	
 	# follow starting point in process
-	start = nodes_arr[0].global_position
+	start = start_point_given if start_point_given else nodes_arr[0].global_position
+	
 	
 	# apply shift
 	var shift = start - points_arr[0]
@@ -68,15 +76,15 @@ func reach_target(goal): # PROCESSED
 	
 	
 	# Nodes transformations
-	for i in range (nodes_arr.size()):
-		# apply translation to nodes
-		nodes_arr[i].global_position = points_arr[i]
-		
-		# apply rotation to nodes
-		if i <= nodes_arr.size() - 2:
-			var dir = points_arr[i+1] - points_arr[i]
-			var rot = Vector2(1,0).angle_to( dir ) + ang_offset[i]
-			nodes_arr[i].global_rotation = rot
-	
+	if apply_transf:
+		for i in range (nodes_arr.size()):
+			# apply translation to nodes
+			nodes_arr[i].global_position = points_arr[i]
+			
+			# apply rotation to nodes
+			if i <= nodes_arr.size() - 2:
+				var dir = points_arr[i+1] - points_arr[i]
+				var rot = Vector2(1,0).angle_to( dir ) + ang_offset[i]
+				nodes_arr[i].global_rotation = rot
 	
 	return points_arr

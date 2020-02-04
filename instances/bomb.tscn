@@ -1,7 +1,11 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://sprites/vfx/energy_sphere.png" type="Texture" id=1]
 [ext_resource path="res://script/bomb.gd" type="Script" id=2]
+
+[sub_resource type="PhysicsMaterial" id=4]
+friction = 0.0
+bounce = 1.0
 
 [sub_resource type="CanvasItemMaterial" id=1]
 blend_mode = 1
@@ -27,8 +31,9 @@ tracks/0/keys = {
 radius = 48.8718
 
 [node name="bomb" type="RigidBody2D"]
+physics_material_override = SubResource( 4 )
 gravity_scale = 0.0
-linear_damp = 10.0
+linear_damp = 1.0
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_group_": true

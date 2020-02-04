@@ -77,6 +77,7 @@ func _process(d):
 	
 	vec_mov += trust_vector*d
 	vec_mov = vec_mov.clamped(MAX_SPEED)
+	
 	var collision = move_and_collide(vec_mov)
 	trust_vector = Vector2()
 	

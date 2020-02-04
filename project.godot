@@ -75,6 +75,13 @@ game_action={
  ]
 }
 
+[physics]
+
+2d/thread_model=2
+
 [rendering]
 
+quality/2d/use_pixel_snap=true
+threads/thread_model=2
+quality/filters/msaa=3
 environment/default_environment="res://default_env.tres"
